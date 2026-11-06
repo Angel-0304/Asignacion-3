@@ -1,0 +1,10 @@
+# /etc/netplan/01-netcfg.yaml - Servidor Zabbix
+# Cliente DHCP. dhcp-identifier: mac hace que el Client-ID sea 01 + MAC,
+# para que coincida con la reserva del router (client-identifier 0150.8a1d.0052.00).
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: yes
+      dhcp-identifier: mac

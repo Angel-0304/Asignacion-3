@@ -1,0 +1,34 @@
+! =====================================================================
+! SW-ZBX - Comandos aplicados (Cisco IOL L2)
+! IP de gestión y SNMP de solo lectura
+! =====================================================================
+enable
+configure terminal
+hostname SW-ZBX
+no ip domain-lookup
+no aaa new-model
+clock timezone AST -4
+!
+interface range e0/1 - 2
+ switchport mode access
+ switchport access vlan 1
+exit
+!
+! --- IP de gestión ---
+interface vlan 1
+ ip address 10.23.56.2 255.255.255.0
+ no shutdown
+exit
+ip default-gateway 10.23.56.1
+ip route 0.0.0.0 0.0.0.0 10.23.56.1
+!
+! --- SNMP solo lectura, restringido al servidor Zabbix ---
+ip access-list standard SNMP-ZABBIX
+ permit host 10.23.56.20
+ deny any log
+exit
+snmp-server community ITLA2356-RO RO SNMP-ZABBIX
+snmp-server location Lab-ITLA-PNETLab
+snmp-server contact Angel Alcantara
+end
+write memory

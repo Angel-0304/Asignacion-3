@@ -1,0 +1,137 @@
+R-ZBX#show running-config
+Building configuration...
+
+Current configuration : 1670 bytes
+!
+! Last configuration change at 17:01:30 AST Thu Nov 5 2026
+!
+version 15.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname R-ZBX
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+clock timezone AST -4 0
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+!
+ip dhcp excluded-address 10.23.56.1 10.23.56.20
+!
+ip dhcp pool LAN-2356
+ network 10.23.56.0 255.255.255.0
+ default-router 10.23.56.1
+ dns-server 8.8.8.8 1.1.1.1
+!
+ip dhcp pool ZABBIX-SRV
+ host 10.23.56.20 255.255.255.0
+ client-identifier 0150.8a1d.0052.00
+ default-router 10.23.56.1
+ dns-server 8.8.8.8 1.1.1.1
+!
+!
+!
+no ip domain lookup
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+redundancy
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ description WAN-Cloud0
+ ip address dhcp
+ ip nat outside
+ ip virtual-reassembly in
+!
+interface Ethernet0/1
+ description LAN-SW-ZBX
+ ip address 10.23.56.1 255.255.255.0
+ ip nat inside
+ ip virtual-reassembly in
+!
+interface Ethernet0/2
+ no ip address
+ shutdown
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip nat inside source list 1 interface Ethernet0/0 overload
+!
+ip access-list standard SNMP-ZABBIX
+ permit 10.23.56.20
+ deny   any log
+!
+!
+snmp-server community ITLA2356-RO RO SNMP-ZABBIX
+snmp-server location Lab-ITLA-PNETLab
+snmp-server contact Angel Alcantara
+!
+access-list 1 permit 10.23.56.0 0.0.0.255
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+!
+line con 0
+ logging synchronous
+line aux 0
+line vty 0 4
+ login
+ transport input none
+!
+!
+end

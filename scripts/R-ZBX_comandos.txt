@@ -1,0 +1,55 @@
+! =====================================================================
+! R-ZBX - Comandos aplicados (Cisco IOL)
+! Direccionamiento, NAT, servidor DHCP con reserva y SNMP de solo lectura
+! =====================================================================
+enable
+configure terminal
+hostname R-ZBX
+no ip domain-lookup
+no aaa new-model
+no service config
+clock timezone AST -4
+!
+interface e0/0
+ description WAN-Cloud0
+ ip address dhcp
+ ip nat outside
+ no shutdown
+!
+interface e0/1
+ description LAN-SW-ZBX
+ ip address 10.23.56.1 255.255.255.0
+ ip nat inside
+ no shutdown
+exit
+!
+! --- Servidor DHCP de la LAN ---
+ip dhcp excluded-address 10.23.56.1 10.23.56.20
+ip dhcp pool LAN-2356
+ network 10.23.56.0 255.255.255.0
+ default-router 10.23.56.1
+ dns-server 8.8.8.8 1.1.1.1
+exit
+!
+! --- Reserva para el servidor Zabbix (Client-ID = 01 + MAC) ---
+ip dhcp pool ZABBIX-SRV
+ host 10.23.56.20 255.255.255.0
+ client-identifier 0150.8a1d.0052.00
+ default-router 10.23.56.1
+ dns-server 8.8.8.8 1.1.1.1
+exit
+!
+! --- NAT overload hacia Cloud0 ---
+access-list 1 permit 10.23.56.0 0.0.0.255
+ip nat inside source list 1 interface e0/0 overload
+!
+! --- SNMP solo lectura, restringido al servidor Zabbix ---
+ip access-list standard SNMP-ZABBIX
+ permit host 10.23.56.20
+ deny any log
+exit
+snmp-server community ITLA2356-RO RO SNMP-ZABBIX
+snmp-server location Lab-ITLA-PNETLab
+snmp-server contact Angel Alcantara
+end
+write memory
